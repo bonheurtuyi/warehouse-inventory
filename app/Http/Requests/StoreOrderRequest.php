@@ -6,12 +6,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
 {
+
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,9 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'customer_id' => 'required|numeric',
+            'product_id'=> 'required|numeric',
+            'qty' => 'required|numeric',
         ];
     }
 }

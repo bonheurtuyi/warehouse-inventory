@@ -20,13 +20,27 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
+    public function approved()
+    {
+        $orders = Order::all()->where('status', 1);
+
+        return view('admin.orders.approved', compact('orders'));
+    }
+
+    public function pending()
+    {
+        $orders = Order::all()->where('status', 0);
+
+        return view('admin.orders.pending', compact('orders'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
         $customers = Customer::all();
-        $products = Product::all();
+        $products = Product::where('quantity', '>', 0)->get();
         return view('admin.orders.create', compact('customers', 'products'));
     }
 
@@ -35,6 +49,29 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        $order = new Order();
+        $validated = $request->validated();
+
+        $validated['customer_id'] = $request->input('customer_id');
+        $validated['status'] = 0;
+        $product = Product::findOrFail($request->product_id);
+        $validated['order_total'] = $product->price * $validated['qty'];
+
+        if ($request->validated('qty') > $product->quantity) {
+            session()->flash('status', 'The order quantity is greater than the quantity of a product in stock!, Please try again');
+            return redirect()->route('orders.index');
+        }
+
+        $order->fill($validated);
+        $order->save();
+
+        $product->quantity -= $request->validated('qty');
+        $product->outQty += $request->validated('qty');
+        $product->save();
+
+        session()->flash('status', 'Order created successfully!');
+        return redirect()->route('orders.index');
+
 
     }
 
@@ -57,16 +94,26 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateOrderRequest $request, Order $order)
+    public function update(UpdateOrderRequest $request, $orderId)
     {
-        //
+        $order = Order::findOrFail($orderId);
+        $validated = $request->all();
+        $validated['status'] = 1;
+        $order->update($validated);
+
+        session()->flash('status', 'Order approved successfully!');
+        return redirect()->route('orders.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Order $order)
+    public function destroy( $orderId)
     {
-        //
+        $order = Order::findOrFail($orderId);
+        $order->delete();
+
+        session()->flash('status', 'Order deleted successfully!');
+        return redirect()->route('orders.index');
     }
 }

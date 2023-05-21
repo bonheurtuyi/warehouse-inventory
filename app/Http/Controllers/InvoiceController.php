@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\Order;
 
 class InvoiceController extends Controller
 {
@@ -13,7 +14,20 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        //
+        $invoices = Invoice::all();
+        return view('admin.invoices.index', compact('invoices'));
+    }
+
+    public function approved()
+    {
+        $invoices = Invoice::all()->where('status', 1);
+        return view('admin.invoices.approved', compact('invoices'));
+    }
+
+    public function pending()
+    {
+        $invoices = Invoice::all()->where('status', 0);
+        return view('admin.invoices.pending', compact('invoices'));
     }
 
     /**
@@ -21,7 +35,8 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        //
+        $orders = Order::all()->where('status', 1);
+        return view('admin.invoices.create', compact('orders'));
     }
 
     /**
@@ -29,7 +44,10 @@ class InvoiceController extends Controller
      */
     public function store(StoreInvoiceRequest $request)
     {
-        //
+        Invoice::create($request->validated());
+        session()->flash('status', 'Invoice created successfully!');
+
+        return redirect()->route('invoices.index');
     }
 
     /**
@@ -51,9 +69,15 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function update(UpdateInvoiceRequest $request, $invoiceId)
     {
-        //
+        $invoice = Invoice::findOrFail($invoiceId);
+        $validated = $request->all();
+        $validated['status'] = 1;
+        $invoice->update($validated);
+
+        session()->flash('status', 'Invoice approved successfully!');
+        return redirect()->route('invoices.index');
     }
 
     /**

@@ -49,6 +49,7 @@ class ProductController extends Controller
         $imageName = time().'.'.$image->getClientOriginalExtension();
         $image->storeAs('uploads/products', $imageName);
         $validated['image'] = $imageName;
+        $validated['inQty'] = $request->input('quantity');
 
         Product::create($validated);
 
@@ -90,7 +91,9 @@ class ProductController extends Controller
             $imageName = time().'.'.$image->getClientOriginalExtension();
             $image->storeAs('uploads/products', $imageName);
             $validated['image'] = $imageName;
+
         }
+        $validated['inQty'] = $request->input('quantity');
 
         $product->update($validated);
 

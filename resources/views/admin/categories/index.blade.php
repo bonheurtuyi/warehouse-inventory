@@ -41,7 +41,7 @@
                                                         <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
                                                         </form>
                                                     </div>
                                                 </div>
@@ -51,7 +51,7 @@
                                 </tbody>
                                 <tfoot>
                                 <tr>
-                                    <<th>ID</th>
+                                    <th>ID</th>
                                     <th>Name</th>
                                     <th>Created at</th>
                                     <th>Actions</th>
